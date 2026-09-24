@@ -1,0 +1,95 @@
+-- Shared helpers for the pgTAP suites. Included with \ir from each test file;
+-- everything is created inside the test transaction and rolled back.
+create extension if not exists pgtap with schema extensions;
+set search_path = public, extensions;
+
+create schema if not exists tests;
+grant usage on schema tests to anon, authenticated, service_role;
+
+-- Creates an auth user; the sign-up trigger creates the profile.
+create or replace function tests.create_user(
+  p_username text,
+  p_birth date default date '1995-05-05',
+  p_country text default 'PY',
+  p_terms text default '2026-09'
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_id uuid := gen_random_uuid();
+begin
+  insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+                          raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values ('00000000-0000-0000-0000-000000000000', v_id, 'authenticated', 'authenticated',
+          p_username || '.' || left(v_id::text, 8) || '@test.local', '', now(), '{"provider":"email"}',
+          jsonb_build_object('username', p_username, 'display_name', initcap(p_username),
+                             'birth_date', p_birth, 'country', p_country, 'terms_version', p_terms),
+          now(), now());
+  return v_id;
+end;
+$$;
+
+create or replace function tests.as_user(p_id uuid)
+returns void
+language plpgsql
+as $$
+begin
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p_id, 'role', 'authenticated')::text, true);
+end;
+$$;
+
+create or replace function tests.as_anon()
+returns void
+language plpgsql
+as $$
+begin
+  perform set_config('role', 'anon', true);
+  perform set_config('request.jwt.claims', '{"role":"anon"}', true);
+end;
+$$;
+
+create or replace function tests.as_service()
+returns void
+language plpgsql
+as $$
+begin
+  perform set_config('role', 'service_role', true);
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+end;
+$$;
+
+create or replace function tests.as_postgres()
+returns void
+language plpgsql
+as $$
+begin
+  perform set_config('role', 'postgres', true);
+  perform set_config('request.jwt.claims', '', true);
+end;
+$$;
+
+create or replace function tests.grant_role(p_user uuid, p_role public.admin_role)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  insert into private.admin_roles (user_id, role) values (p_user, p_role) on conflict do nothing
+$$;
+
+-- Registers an uploaded object as if the Storage API had stored it.
+create or replace function tests.fake_object(p_bucket text, p_name text, p_owner uuid)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  insert into storage.objects (bucket_id, name, owner, owner_id, metadata)
+  values (p_bucket, p_name, p_owner, p_owner::text, '{"mimetype":"image/jpeg","size":100}')
+$$;
+
+grant execute on all functions in schema tests to anon, authenticated, service_role;

@@ -1,0 +1,6 @@
+-- Local seed. Reference data (countries, categories, plans, config) lives in
+-- the migrations. Demo content is created by `node scripts/seed-demo.mjs`.
+--
+-- To give yourself admin roles after signing up in the app, run in the SQL editor:
+--   insert into private.admin_roles (user_id, role)
+--   select id, 'SUPER_ADMIN' from public.profiles where username = 'tu_usuario';
