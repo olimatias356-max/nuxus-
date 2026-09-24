@@ -23,10 +23,11 @@ export class HttpError extends Error {
 }
 
 /** Wraps a handler with CORS preflight, method check, body size limit and error mapping. */
-export function handler(fn: (req: Request) => Promise<Response>, opts: { maxBody?: number } = {}) {
+export function handler(fn: (req: Request) => Promise<Response>, opts: { maxBody?: number; methods?: string[] } = {}) {
+  const methods = opts.methods ?? ['POST'];
   return async (req: Request): Promise<Response> => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-    if (req.method !== 'POST') return fail(405, 'Método no permitido');
+    if (!methods.includes(req.method)) return fail(405, 'Método no permitido');
     const length = Number(req.headers.get('content-length') ?? '0');
     if (length > (opts.maxBody ?? 64 * 1024)) return fail(413, 'Solicitud demasiado grande');
     try {

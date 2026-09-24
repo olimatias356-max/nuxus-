@@ -80,14 +80,20 @@ deno_version = 2
 [functions.delete-account]
 verify_jwt = true
 
-[functions.purchase-verify]
-verify_jwt = true
-
-[functions.billing-webhook]
-verify_jwt = false
-
 [functions.push-dispatch]
 verify_jwt = false
 
 [functions.payout-webhook]
+verify_jwt = false
+
+# Public: Google calls it; trust comes from the ECDSA signature checked inside.
+[functions.admob-ssv]
+verify_jwt = false
+
+# Service role only (checked inside the function).
+[functions.admob-import]
+verify_jwt = false
+
+# Service role only (checked inside the function).
+[functions.dlocal-payouts]
 verify_jwt = false

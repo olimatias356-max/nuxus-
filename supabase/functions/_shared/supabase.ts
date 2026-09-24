@@ -1,9 +1,16 @@
 import { createClient, type SupabaseClient, type User } from 'npm:@supabase/supabase-js@2';
 
+import { safeEqual } from './crypto.ts';
 import { HttpError } from './http.ts';
 
 const url = Deno.env.get('SUPABASE_URL') ?? '';
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+/** For cron / internal jobs: the caller must send `Authorization: Bearer <service role key>`. */
+export function requireServiceRole(req: Request): void {
+  const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+  if (!serviceKey || !bearer || !safeEqual(bearer, serviceKey)) throw new HttpError(401, 'unauthorized');
+}
 
 /** Service-role client: bypasses RLS. Only use after validating the caller. */
 export function adminClient(): SupabaseClient {

@@ -12,7 +12,7 @@ cambia, se cambia primero en este archivo.
    - Al activarla, el ingreso de los anuncios asociados a su contenido se reparte **50 % plataforma / 50 % creador**, **solo desde `activated_at`** (no retroactivo).
    - El porcentaje vive en `app_config` con `is_public = false`. **Nunca se muestra en la app** ni se expone por la API a clientes.
 3. **App** = red social (fotos, videos, reels, historias, chat). **Web** = landing + guías + portal de creadores (métricas avanzadas, datos de cobro dLocal, solicitud de retiros).
-4. **Retiros vía dLocal**, procesados en la ventana **21 al 26 de cada mes** (alineada con el pago de AdMob).
+4. **Retiros vía dLocal**, procesados en la ventana **21 al 26 de cada mes** (alineada con el pago de AdMob). Las fechas se calculan en hora de Paraguay con desfase fijo UTC-3 (vigente todo el año desde octubre de 2024).
 5. **Antifraude obligatorio:** pausa en segundo plano, detección de bloqueadores de anuncios, depuración automática de bots/granjas, huella de dispositivo y límites por IP.
 6. KYC se mantiene: da el check azul ✓ y es requisito legal para cobrar vía dLocal.
 
@@ -148,7 +148,7 @@ Contadores de horas y seguidores válidos se **derivan** de sesiones/seguidores 
 ## 7. Ingresos y ledger
 
 1. La app registra impresiones (`log_ad_impression`) y AdMob confirma las bonificadas por SSV.
-2. Diariamente `admob-import` trae los ingresos reales de AdMob (API de reportes) → `svc_import_ad_revenue`: reparte el bruto del período entre creadores **activos** en proporción a sus impresiones **válidas** posteriores a `activated_at` (peso = `value_micros` si > 0, si no 1), aplica el 50 %, convierte a la moneda del creador con `fx_rates` y acredita en bucket `PENDING` guardando `base_amount/base_currency/exchange_rate`. Referencia idempotente `admob:<import>:<creator>`.
+2. Diariamente `admob-import` trae los ingresos reales de AdMob (API de reportes) → `svc_import_ad_revenue`: reparte el bruto del período entre creadores **activos** en proporción a sus impresiones **válidas** posteriores a `activated_at` (peso = `value_micros` si > 0, si no 1), aplica el 50 %, convierte a la moneda del creador con `fx_rates` (objeto plano: unidades de la moneda del creador por 1 unidad de `p_currency`, p. ej. `{"PYG":7300,"ARS":1150,"BRL":5.4}`; igual a `FX_RATES_JSON`) y acredita en bucket `PENDING` guardando `base_amount/base_currency/exchange_rate`. Referencia idempotente `admob:<import>:<creator>`. El mismo `external_ref` no se importa dos veces y un período que se superpone con otra importación se rechaza (`PT409`).
 3. Cuando AdMob paga (21–26), Finanzas/cron ejecuta `release` → `PENDING → AVAILABLE`.
 4. Retiros (§4) → dLocal (§8).
 
