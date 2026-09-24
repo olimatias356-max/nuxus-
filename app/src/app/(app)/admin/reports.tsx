@@ -9,6 +9,8 @@ import type { AdminReport } from '@/lib/types';
 import { confirmAction } from '@/lib/confirm';
 import { Button, Card, colors, EmptyState, ErrorState, Header, Loading, Pill, radius, space, Text, useToast } from '@/ui';
 
+const TARGET: Record<string, string> = { post: 'Publicación', comment: 'Comentario', user: 'Cuenta', message: 'Mensaje', story: 'Historia' };
+const STATUS: Record<string, string> = { published: 'publicado', review: 'oculto en revisión', removed: 'quitado', active: 'activa', restricted: 'restringida', suspended: 'suspendida' };
 const REASON: Record<string, string> = {
   sexual: 'Sexual', minors: 'Menores', violence: 'Violencia', harassment: 'Acoso', hate: 'Odio', self_harm: 'Autolesión',
   impersonation: 'Suplantación', copyright: 'Copyright', spam: 'Spam', other: 'Otro',
@@ -46,8 +48,8 @@ export default function Reports() {
           renderItem={({ item }) => (
             <Card tone={item.reasons.includes('minors') ? 'danger' : 'default'}>
               <View style={styles.head}>
-                <Pill label={item.target_type.toUpperCase()} />
-                <Text variant="smallStrong">{item.report_count} reportes</Text>
+                <Pill label={TARGET[item.target_type] ?? item.target_type} />
+                <Text variant="smallStrong">{item.report_count === 1 ? '1 reporte' : `${item.report_count} reportes`}</Text>
                 <Text variant="caption" tone="subtle">
                   · {timeAgo(item.first_reported_at)}
                 </Text>
@@ -65,7 +67,7 @@ export default function Reports() {
                     {item.preview_text || '(sin texto)'}
                   </Text>
                   <Text variant="caption" tone="subtle">
-                    Estado: {item.content_status}
+                    Estado: {STATUS[item.content_status ?? ''] ?? item.content_status}
                   </Text>
                 </View>
               </View>

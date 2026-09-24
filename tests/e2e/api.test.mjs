@@ -23,15 +23,29 @@ const client = () => createClient(URL_, ANON, { auth: { persistSession: false, a
 const service = createClient(URL_, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
 const JPEG = Buffer.from('/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==', 'base64');
 
+const codeIn = (text = '') => text.match(/>\s*(\d{6})\s*</)?.[1] ?? text.match(/\b(\d{6})\b/)?.[1];
+
+// Reads the OTP from the local mail catcher (Mailpit, or Inbucket on older Supabase CLIs).
 async function otpFor(email, afterMs) {
-  for (let i = 0; i < 40; i++) {
-    const res = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${email}"`)}`);
-    const { messages = [] } = await res.json();
-    const msg = messages.find((m) => new Date(m.Created).getTime() >= afterMs - 1000);
-    if (msg) {
-      const full = await (await fetch(`${MAILPIT}/api/v1/message/${msg.ID}`)).json();
-      const code = (full.HTML || full.Text || '').match(/>\s*(\d{6})\s*</)?.[1] ?? (full.Text || '').match(/\b(\d{6})\b/)?.[1];
-      if (code) return code;
+  for (let i = 0; i < 60; i++) {
+    const res = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${email}"`)}`).catch(() => null);
+    if (res?.ok) {
+      const { messages = [] } = await res.json();
+      const msg = messages.find((m) => new Date(m.Created).getTime() >= afterMs - 1000);
+      if (msg) {
+        const full = await (await fetch(`${MAILPIT}/api/v1/message/${msg.ID}`)).json();
+        const code = codeIn(full.HTML) ?? codeIn(full.Text);
+        if (code) return code;
+      }
+    } else {
+      const box = email.split('@')[0];
+      const list = await fetch(`${MAILPIT}/api/v1/mailbox/${encodeURIComponent(box)}`).then((r) => (r.ok ? r.json() : []), () => []);
+      const msg = [...list].reverse().find((m) => new Date(m.date).getTime() >= afterMs - 1000);
+      if (msg) {
+        const full = await (await fetch(`${MAILPIT}/api/v1/mailbox/${encodeURIComponent(box)}/${msg.id}`)).json();
+        const code = codeIn(full.body?.html) ?? codeIn(full.body?.text);
+        if (code) return code;
+      }
     }
     await new Promise((r) => setTimeout(r, 250));
   }

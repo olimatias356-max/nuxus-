@@ -71,3 +71,4 @@ export { default as Volume2 } from 'lucide-react-native/icons/volume-2';
 export { default as VolumeX } from 'lucide-react-native/icons/volume-x';
 export { default as Wallet } from 'lucide-react-native/icons/wallet';
 export { default as X } from 'lucide-react-native/icons/x';
+export { default as ArrowRight } from 'lucide-react-native/icons/arrow-right';

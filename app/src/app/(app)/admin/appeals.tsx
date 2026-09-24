@@ -24,7 +24,7 @@ export default function Appeals() {
           renderItem={({ item }) => (
             <Card>
               <View style={{ flexDirection: 'row', gap: space[2], alignItems: 'center' }}>
-                <Pill label={item.target_type} />
+                <Pill label={({ post: 'Publicación', story: 'Historia', comment: 'Comentario', account: 'Cuenta', kyc: 'Verificación', strike: 'Strike' } as Record<string, string>)[item.target_type] ?? item.target_type} />
                 <Text variant="caption" tone="subtle">
                   {timeAgo(item.created_at)}
                 </Text>

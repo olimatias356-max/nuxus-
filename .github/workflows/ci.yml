@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App (typecheck, lint, tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - name: Bundle (web)
+        run: npx expo export --platform web --output-dir dist
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          EXPO_PUBLIC_SUPABASE_KEY: ci-placeholder-publishable-key
+
+  backend:
+    name: Supabase (migrations, RLS tests, Edge Functions, e2e)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase
+        run: supabase start -x studio,imgproxy,vector,logflare,supavisor
+      - name: Database security tests (pgTAP)
+        run: supabase test db
+      - name: Serve Edge Functions
+        run: |
+          printf 'ALLOW_SANDBOX_PURCHASES=true\nPAYOUT_WEBHOOK_SECRET=ci-payout-secret\n' > supabase/functions/.env
+          nohup supabase functions serve --env-file supabase/functions/.env > functions.log 2>&1 &
+          sleep 20
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+      - name: End-to-end API tests
+        working-directory: tests/e2e
+        run: |
+          npm ci
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          export SUPABASE_URL="$API_URL" SUPABASE_ANON_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          export DATABASE_URL="$DB_URL" MAILPIT_URL="${MAILPIT_URL:-$INBUCKET_URL}" PAYOUT_WEBHOOK_SECRET=ci-payout-secret
+          npm test -- api.test.mjs
+      - name: Edge Functions logs
+        if: failure()
+        run: cat functions.log || true

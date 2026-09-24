@@ -609,6 +609,17 @@ begin
 end;
 $$;
 
+create function private.bucket_label(p_bucket public.balance_bucket)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  select case p_bucket
+    when 'ESTIMATED' then 'estimado' when 'PENDING' then 'pendiente' when 'CONFIRMED' then 'confirmado'
+    when 'AVAILABLE' then 'disponible' when 'PROCESSING' then 'en proceso' when 'PAID' then 'pagado' end
+$$;
+
 -- Forward-only balance transitions ESTIMATED -> PENDING -> CONFIRMED -> AVAILABLE.
 create function private.advance_balance(p_user uuid, p_currency text, p_from public.balance_bucket,
                                         p_to public.balance_bucket, p_amount bigint, p_reference text)
@@ -623,7 +634,7 @@ begin
     raise exception 'Transición de saldo no permitida: % -> %', p_from, p_to using errcode = '22023';
   end if;
   return private.ledger_move(p_user, p_currency, p_from, p_to, p_amount, 'release', 'adjustment',
-                             'Saldo ' || lower(p_from::text) || ' pasa a ' || lower(p_to::text), p_reference);
+                             'Saldo ' || private.bucket_label(p_from) || ' pasa a ' || private.bucket_label(p_to), p_reference);
 end;
 $$;
 
