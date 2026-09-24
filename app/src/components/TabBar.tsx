@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import * as Haptics from 'expo-haptics';
-import { Bell, Clapperboard, House, Plus } from 'lucide-react-native';
+import { Bell, Clapperboard, House, Plus } from '@/ui/icons';
 
 import { useAuth } from '@/lib/auth';
 import { useBadges } from '@/lib/api/activity';
@@ -11,7 +11,7 @@ import { Avatar, colors, TAB_BAR_HEIGHT, Text } from '@/ui';
 const ITEMS: Record<string, { label: string; icon?: typeof House }> = {
   home: { label: 'Inicio', icon: House },
   reels: { label: 'Reels', icon: Clapperboard },
-  create: { label: 'Crear' },
+  new: { label: 'Crear' },
   activity: { label: 'Actividad', icon: Bell },
   me: { label: 'Perfil' },
 };
@@ -31,7 +31,7 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
         const focused = state.index === index;
         const color = focused ? colors.text : colors.textSubtle;
 
-        if (route.name === 'create') {
+        if (route.name === 'new') {
           return (
             <Pressable
               key={route.key}
@@ -64,7 +64,7 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
             style={styles.tab}>
             {route.name === 'me' ? (
               <View style={[styles.avatarRing, focused && { borderColor: colors.text }]}>
-                <Avatar path={profile?.avatar_path} name={profile?.username ?? 'yo'} size={26} />
+                <Avatar path={profile?.avatar_path} name={profile?.display_name ?? 'yo'} size={26} />
               </View>
             ) : Icon ? (
               <Icon size={25} color={color} strokeWidth={focused ? 2.4 : 2} fill={focused && route.name === 'home' ? color : 'transparent'} />

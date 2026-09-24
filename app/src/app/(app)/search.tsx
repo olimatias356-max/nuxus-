@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Search as SearchIcon, X } from 'lucide-react-native';
+import { ChevronLeft, Search as SearchIcon, X } from '@/ui/icons';
 
 import { SuggestedCreators } from '@/components/SuggestedCreators';
 import { useSearchProfiles } from '@/lib/api/social';
@@ -55,7 +55,7 @@ export default function Search() {
           ListEmptyComponent={<EmptyState icon={SearchIcon} title="Sin resultados" text={`No encontramos creadores para "${q}".`} />}
           renderItem={({ item }) => (
             <Pressable style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surface }]} onPress={() => router.push({ pathname: '/u/[username]', params: { username: item.username } })} accessibilityRole="button">
-              <Avatar path={item.avatar_path} name={item.username} size={48} />
+              <Avatar path={item.avatar_path} name={item.display_name} size={48} />
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                   <Text variant="bodyStrong" numberOfLines={1}>

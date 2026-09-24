@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ban, Bookmark, ChevronLeft, Ellipsis, Flag, Grid3x3, ImagePlus, Link2, MessageCircle, Settings, Share2 } from 'lucide-react-native';
+import { Ban, Bookmark, ChevronLeft, Ellipsis, Flag, Grid3x3, ImagePlus, Link2, MessageCircle, Settings, Share2 } from '@/ui/icons';
 import * as Linking from 'expo-linking';
 
 import { startConversation } from '@/lib/api/activity';
@@ -12,6 +12,7 @@ import { useBlockUser, useIsFollowing, useToggleFollow } from '@/lib/api/social'
 import { errorMessage } from '@/lib/errors';
 import { formatCount } from '@/lib/format';
 import type { Profile } from '@/lib/types';
+import { confirmAction } from '@/lib/confirm';
 import { ActionSheet, Avatar, Button, colors, EmptyState, IconButton, Loading, space, Text, useToast, VerifiedBadge } from '@/ui';
 import { PostGrid } from './PostGrid';
 
@@ -67,7 +68,7 @@ export function ProfileView({ profile, me, isTab }: { profile: Profile; me: stri
 
         <View style={styles.body}>
           <View style={styles.identity}>
-            <Avatar path={profile.avatar_path} name={profile.username} size={92} />
+            <Avatar path={profile.avatar_path} name={profile.display_name} size={92} />
             <View style={styles.stats}>
               <Stat value={profile.posts_count} label="Posts" />
               <Stat value={profile.followers_count} label="Seguidores" />
@@ -144,25 +145,20 @@ export function ProfileView({ profile, me, isTab }: { profile: Profile; me: stri
             label: 'Bloquear',
             icon: Ban,
             danger: true,
-            onPress: () =>
-              Alert.alert(`¿Bloquear a @${profile.username}?`, 'No verás su contenido y no podrá interactuar con vos.', [
-                { text: 'Cancelar', style: 'cancel' },
+            onPress: async () => {
+              const ok = await confirmAction({ title: `¿Bloquear a @${profile.username}?`, message: 'No verás su contenido y no podrá interactuar con vos.', confirmText: 'Bloquear', destructive: true });
+              if (!ok) return;
+              block.mutate(
+                { target: profile.id },
                 {
-                  text: 'Bloquear',
-                  style: 'destructive',
-                  onPress: () =>
-                    block.mutate(
-                      { target: profile.id },
-                      {
-                        onSuccess: () => {
-                          toast('Usuario bloqueado');
-                          router.back();
-                        },
-                        onError: (e) => toast(errorMessage(e), 'error'),
-                      },
-                    ),
+                  onSuccess: () => {
+                    toast('Usuario bloqueado');
+                    router.back();
+                  },
+                  onError: (e) => toast(errorMessage(e), 'error'),
                 },
-              ]),
+              );
+            },
           },
         ]}
       />

@@ -2,7 +2,7 @@
 // Paraguay, Argentina and Brazil before publishing to the stores.
 export type LegalDoc = 'terms' | 'privacy' | 'rules';
 
-export const LEGAL: Record<LegalDoc, { title: string; updated: string; sections: Array<{ h: string; p: string }> }> = {
+export const LEGAL: Record<LegalDoc, { title: string; updated: string; sections: { h: string; p: string }[] }> = {
   terms: {
     title: 'Términos de uso',
     updated: 'Septiembre 2026',

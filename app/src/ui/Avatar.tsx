@@ -7,7 +7,7 @@ import { initials } from '@/lib/format';
 import { Text } from './Text';
 import { colors, fonts } from './theme';
 
-const PALETTES: Array<[string, string]> = [
+const PALETTES: [string, string][] = [
   ['#3D5AFE', '#00B8D4'],
   ['#FF3B6B', '#FF9E3D'],
   ['#7C4DFF', '#FF4FD8'],

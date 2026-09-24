@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Alert, Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { Eye, Flag, Trash, X } from 'lucide-react-native';
+import { Eye, Flag, Trash, X } from '@/ui/icons';
 
 import { MediaImage, MediaVideo } from '@/components/Media';
 import { markStoryViewed, useDeleteStory, useStories, useStoryRail } from '@/lib/api/stories';
@@ -12,6 +12,7 @@ import { useMe } from '@/lib/auth';
 import { queryClient } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
 import { timeAgo } from '@/lib/format';
+import { confirmAction } from '@/lib/confirm';
 import { Avatar, colors, IconButton, Loading, space, Text, useToast, VerifiedBadge } from '@/ui';
 
 const IMAGE_MS = 5000;
@@ -27,7 +28,7 @@ export default function StoryViewer() {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const progress = useRef(new Animated.Value(0)).current;
+  const [progress] = useState(() => new Animated.Value(0));
   const author = rail?.find((r) => r.author_id === authorId);
   const story = stories?.[index];
   const isMine = authorId === userId;
@@ -145,12 +146,16 @@ export default function StoryViewer() {
               icon={Trash}
               label="Eliminar historia"
               color="#fff"
-              onPress={() => {
+              onPress={async () => {
                 setPaused(true);
-                Alert.alert('¿Eliminar esta historia?', undefined, [
-                  { text: 'Cancelar', style: 'cancel', onPress: () => setPaused(false) },
-                  { text: 'Eliminar', style: 'destructive', onPress: () => del.mutate(story, { onSuccess: () => { toast('Historia eliminada'); router.back(); } }) },
-                ]);
+                const ok = await confirmAction({ title: '¿Eliminar esta historia?', confirmText: 'Eliminar', destructive: true });
+                if (!ok) return setPaused(false);
+                del.mutate(story, {
+                  onSuccess: () => {
+                    toast('Historia eliminada');
+                    router.back();
+                  },
+                });
               }}
             />
           ) : (

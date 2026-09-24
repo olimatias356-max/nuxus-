@@ -1,6 +1,6 @@
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { Banknote, Flag, Gavel, IdCard, ShieldAlert } from 'lucide-react-native';
+import { Banknote, Flag, Gavel, IdCard, ShieldAlert } from '@/ui/icons';
 
 import { hasRole, useAdminRoles } from '@/lib/api/admin';
 import { colors, EmptyState, Header, ListRow, Loading, Section, space, Text } from '@/ui';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { ArrowDownToLine, ChevronRight, Crown, Eye, Heart, IdCard, Landmark, Receipt, TrendingUp, Users, type LucideIcon } from 'lucide-react-native';
+import { ArrowDownToLine, ChevronRight, Crown, Eye, Heart, IdCard, Landmark, Receipt, TrendingUp, Users, type LucideIcon } from '@/ui/icons';
 
 import { useCreatorStats, useMonetization } from '@/lib/api/money';
 import { errorMessage } from '@/lib/errors';
@@ -16,7 +16,7 @@ const RANGES = [
   { value: 'month', label: '30 días' },
 ] as const;
 
-const BUCKETS: Array<{ key: BalanceBucket; label: string; hint: string }> = [
+const BUCKETS: { key: BalanceBucket; label: string; hint: string }[] = [
   { key: 'ESTIMATED', label: 'Estimado', hint: 'Calculado, falta validar el tráfico' },
   { key: 'PENDING', label: 'Pendiente', hint: 'En validación antifraude' },
   { key: 'CONFIRMED', label: 'Confirmado', hint: 'Validado, se libera pronto' },

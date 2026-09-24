@@ -1,6 +1,6 @@
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import { Plus } from '@/ui/icons';
 
 import { useStoryRail } from '@/lib/api/stories';
 import type { Profile } from '@/lib/types';
@@ -26,7 +26,7 @@ export function StoryRail({ me }: { me: Profile | null }) {
             accessibilityLabel={mine ? 'Ver tu historia' : 'Crear una historia'}
             onPress={() => (mine ? router.push({ pathname: '/story/[authorId]', params: { authorId: me.id } }) : router.push({ pathname: '/create', params: { mode: 'story' } }))}>
             <View>
-              <Avatar path={me.avatar_path} name={me.username} size={68} ring={mine ? (mine.has_unseen ? 'unseen' : 'seen') : 'none'} />
+              <Avatar path={me.avatar_path} name={me.display_name} size={68} ring={mine ? (mine.has_unseen ? 'unseen' : 'seen') : 'none'} />
               {!mine ? (
                 <View style={styles.plus}>
                   <Plus size={14} color={colors.onAccent} strokeWidth={3} />
@@ -45,7 +45,7 @@ export function StoryRail({ me }: { me: Profile | null }) {
           accessibilityRole="button"
           accessibilityLabel={`Historia de ${item.username}${item.has_unseen ? ', nueva' : ''}`}
           onPress={() => router.push({ pathname: '/story/[authorId]', params: { authorId: item.author_id } })}>
-          <Avatar path={item.avatar_path} name={item.username} size={68} ring={item.has_unseen ? 'unseen' : 'seen'} />
+          <Avatar path={item.avatar_path} name={item.display_name} size={68} ring={item.has_unseen ? 'unseen' : 'seen'} />
           <Text variant="caption" tone={item.has_unseen ? 'default' : 'subtle'} numberOfLines={1} style={styles.label}>
             {item.username}
           </Text>

@@ -1,11 +1,12 @@
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Application from 'expo-application';
-import { Ban, FileText, Gavel, KeyRound, Landmark, LifeBuoy, LogOut, Pencil, Scale, Shield, ShieldCheck, Trash, UserCog, Wallet } from 'lucide-react-native';
+import { Ban, FileText, Gavel, KeyRound, Landmark, LifeBuoy, LogOut, Pencil, Scale, Shield, ShieldCheck, Trash, UserCog, Wallet } from '@/ui/icons';
 
 import { useAdminRoles } from '@/lib/api/admin';
 import { useBlocks } from '@/lib/api/social';
 import { useMe } from '@/lib/auth';
+import { confirmAction } from '@/lib/confirm';
 import { colors, Header, ListRow, Section, space, Text } from '@/ui';
 
 export default function Settings() {
@@ -44,12 +45,9 @@ export default function Settings() {
             icon={LogOut}
             title="Cerrar sesión"
             chevron={false}
-            onPress={() =>
-              Alert.alert('¿Cerrar sesión?', undefined, [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Cerrar sesión', style: 'destructive', onPress: () => signOut() },
-              ])
-            }
+            onPress={async () => {
+              if (await confirmAction({ title: '¿Cerrar sesión?', confirmText: 'Cerrar sesión', destructive: true })) signOut();
+            }}
           />
           <ListRow icon={Trash} title="Eliminar cuenta" danger onPress={() => router.push('/settings/delete-account')} />
         </Section>

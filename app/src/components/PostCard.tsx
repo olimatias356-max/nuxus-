@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Bookmark, Ellipsis, Heart, MessageCircle, Send, Volume2, VolumeX } from 'lucide-react-native';
+import { Bookmark, Ellipsis, Heart, MessageCircle, Send, Volume2, VolumeX } from '@/ui/icons';
 
 import { trackView, useToggleLike, useToggleSave } from '@/lib/api/posts';
 import { useToggleFollow } from '@/lib/api/social';
@@ -58,7 +58,7 @@ function PostCardImpl({ post, me, active, width, onMore }: Props) {
     <View style={styles.card}>
       <View style={styles.header}>
         <Pressable onPress={openProfile} style={styles.author} accessibilityRole="link" accessibilityLabel={`Perfil de ${post.author_display_name}`}>
-          <Avatar path={post.author_avatar_path} name={post.author_username} size={40} />
+          <Avatar path={post.author_avatar_path} name={post.author_display_name} size={40} />
           <View style={{ flex: 1 }}>
             <View style={styles.nameRow}>
               <Text variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>

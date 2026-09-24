@@ -9,7 +9,7 @@ type Props = {
   scroll?: boolean;
   padded?: boolean;
   keyboard?: boolean;
-  edges?: Array<'top' | 'bottom'>;
+  edges?: ('top' | 'bottom')[];
   contentStyle?: StyleProp<ViewStyle>;
   refreshControl?: ScrollViewProps['refreshControl'];
   footer?: ReactNode;

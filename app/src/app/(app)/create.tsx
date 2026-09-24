@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { Camera, CirclePlay, Image as ImageIcon, Megaphone, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { Camera, CirclePlay, Image as ImageIcon, Megaphone, Sparkles, type LucideIcon } from '@/ui/icons';
 
 import { useCategories } from '@/lib/api/config';
 import { useCreatePost } from '@/lib/api/posts';
@@ -15,7 +15,7 @@ import { Button, Card, colors, Header, Input, ProgressBar, radius, Screen, space
 
 type Mode = 'post' | 'story' | 'video';
 
-const OPTIONS: Array<{ mode: Mode; title: string; text: string; icon: LucideIcon; tint: string }> = [
+const OPTIONS: { mode: Mode; title: string; text: string; icon: LucideIcon; tint: string }[] = [
   { mode: 'post', title: 'Publicación', text: 'Foto o video para tu perfil y el feed', icon: ImageIcon, tint: '#3D9BFF' },
   { mode: 'video', title: 'Reel', text: 'Video vertical de hasta 10 minutos', icon: CirclePlay, tint: '#FF3B6B' },
   { mode: 'story', title: 'Historia', text: 'Desaparece en 24 horas', icon: Sparkles, tint: '#C8FF3D' },

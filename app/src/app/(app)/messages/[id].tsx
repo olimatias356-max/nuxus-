@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { Ellipsis, SendHorizontal, ShieldAlert } from 'lucide-react-native';
+import { Ellipsis, Flag, SendHorizontal, ShieldAlert, User } from '@/ui/icons';
 
 import { markConversationRead, useInbox, useMessages, useSendMessage } from '@/lib/api/activity';
 import { useMe } from '@/lib/auth';
@@ -11,7 +11,7 @@ import { errorMessage } from '@/lib/errors';
 import { formatDate } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import type { Message, MiniProfile } from '@/lib/types';
-import { Avatar, colors, fonts, Header, IconButton, Loading, radius, space, Text, useToast, VerifiedBadge } from '@/ui';
+import { ActionSheet, Avatar, colors, fonts, Header, IconButton, Loading, radius, space, Text, useToast, VerifiedBadge } from '@/ui';
 
 export default function Chat() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -61,21 +61,14 @@ export default function Chat() {
   const p = other.data;
   const canMessage = convo?.can_message ?? true;
 
-  const openMenu = () => {
-    if (!p) return;
-    Alert.alert(`@${p.username}`, undefined, [
-      { text: 'Ver perfil', onPress: () => router.push({ pathname: '/u/[username]', params: { username: p.username } }) },
-      { text: 'Reportar conversación', style: 'destructive', onPress: () => router.push({ pathname: '/report', params: { type: 'user', id: p.id, name: p.username } }) },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
-  };
+  const [menu, setMenu] = useState(false);
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Header
         title={p?.display_name ?? 'Conversación'}
         subtitle={p ? `@${p.username}` : undefined}
-        right={<IconButton icon={Ellipsis} label="Opciones" onPress={openMenu} />}
+        right={<IconButton icon={Ellipsis} label="Opciones" onPress={() => p && setMenu(true)} />}
       />
       {messages.isLoading ? (
         <Loading />
@@ -132,6 +125,19 @@ export default function Chat() {
           </Text>
         </View>
       )}
+      <ActionSheet
+        visible={menu}
+        title={p ? `@${p.username}` : undefined}
+        onClose={() => setMenu(false)}
+        actions={
+          p
+            ? [
+                { label: 'Ver perfil', icon: User, onPress: () => router.push({ pathname: '/u/[username]', params: { username: p.username } }) },
+                { label: 'Reportar conversación', icon: Flag, danger: true, onPress: () => router.push({ pathname: '/report', params: { type: 'user', id: p.id, name: p.username } }) },
+              ]
+            : []
+        }
+      />
     </KeyboardAvoidingView>
   );
 }

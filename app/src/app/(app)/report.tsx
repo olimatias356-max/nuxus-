@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Check } from 'lucide-react-native';
+import { Check } from '@/ui/icons';
 
 import { useReport, type ReportReason, type ReportTarget } from '@/lib/api/social';
 import { errorMessage } from '@/lib/errors';
 import { Button, Card, colors, Header, Input, radius, Screen, space, Text, useToast } from '@/ui';
 
-const REASONS: Array<{ value: ReportReason; label: string }> = [
+const REASONS: { value: ReportReason; label: string }[] = [
   { value: 'minors', label: 'Menores en riesgo' },
   { value: 'sexual', label: 'Contenido sexual o desnudos' },
   { value: 'violence', label: 'Violencia o amenazas' },

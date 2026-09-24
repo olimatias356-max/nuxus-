@@ -87,7 +87,7 @@ export function useSuggestedCreators(me: string) {
         .order('followers_count', { ascending: false })
         .limit(12);
       if (error) throw error;
-      return (data ?? []) as unknown as Array<MiniProfile & { followers_count: number; bio: string }>;
+      return (data ?? []) as unknown as (MiniProfile & { followers_count: number; bio: string })[];
     },
   });
 }

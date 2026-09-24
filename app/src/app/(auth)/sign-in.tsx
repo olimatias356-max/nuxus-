@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { Lock, Mail } from 'lucide-react-native';
+import { Lock, Mail } from '@/ui/icons';
 
 import { errorMessage } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';

@@ -6,7 +6,7 @@ import { supabase } from './supabase';
 // same frame are batched into a single API call and cached until near expiry.
 const TTL_SECONDS = 3600;
 const cache = new Map<string, { url: string; expires: number }>();
-const pending = new Map<string, Array<(url: string | null) => void>>();
+const pending = new Map<string, ((url: string | null) => void)[]>();
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 function cached(path: string): string | null {
@@ -47,21 +47,17 @@ export function getSignedUrl(path: string): Promise<string | null> {
 }
 
 export function useMediaUrl(path: string | null | undefined): string | null {
-  const [url, setUrl] = useState<string | null>(() => (path ? cached(path) : null));
+  const [resolved, setResolved] = useState<{ path: string; url: string | null } | null>(null);
   useEffect(() => {
+    if (!path || cached(path)) return;
     let alive = true;
-    if (!path) {
-      setUrl(null);
-      return;
-    }
-    const hit = cached(path);
-    if (hit) setUrl(hit);
-    else getSignedUrl(path).then((u) => alive && setUrl(u));
+    getSignedUrl(path).then((url) => alive && setResolved({ path, url }));
     return () => {
       alive = false;
     };
   }, [path]);
-  return url;
+  if (!path) return null;
+  return cached(path) ?? (resolved?.path === path ? resolved.url : null);
 }
 
 export function clearSignedUrls() {

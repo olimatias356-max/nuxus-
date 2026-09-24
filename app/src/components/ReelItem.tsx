@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { Bookmark, Ellipsis, Heart, MessageCircle, Plus, Send, VolumeX } from 'lucide-react-native';
+import { Bookmark, Ellipsis, Heart, MessageCircle, Plus, Send, VolumeX } from '@/ui/icons';
 
 import { trackView, useToggleLike, useToggleSave } from '@/lib/api/posts';
 import { useToggleFollow } from '@/lib/api/social';
@@ -28,10 +28,7 @@ function ReelItemImpl({ post, me, active, height, bottomInset, onMore }: Props) 
   const watched = useRef(0);
 
   useEffect(() => {
-    if (!active) {
-      setProgress(0);
-      return;
-    }
+    if (!active) return;
     const t = setTimeout(() => trackView(post.id, 2000), 2000);
     return () => clearTimeout(t);
   }, [active, post.id]);
@@ -88,7 +85,7 @@ function ReelItemImpl({ post, me, active, height, bottomInset, onMore }: Props) 
 
       <View style={[styles.rail, { bottom: bottomInset + space[6] }]}>
         <Pressable onPress={openProfile} accessibilityRole="link" accessibilityLabel={`Perfil de ${post.author_username}`} style={{ marginBottom: 8 }}>
-          <Avatar path={post.author_avatar_path} name={post.author_username} size={48} />
+          <Avatar path={post.author_avatar_path} name={post.author_display_name} size={48} />
           {post.author_id !== me && !post.following ? (
             <Pressable
               accessibilityRole="button"
@@ -134,7 +131,7 @@ function ReelItemImpl({ post, me, active, height, bottomInset, onMore }: Props) 
       </View>
 
       <View style={[styles.progressTrack, { bottom: bottomInset }]} pointerEvents="none">
-        <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+        <View style={[styles.progressBar, { width: `${(active ? progress : 0) * 100}%` }]} />
       </View>
     </View>
   );

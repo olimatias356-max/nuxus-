@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, useWindowDimensions, View, type ViewToken } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Compass, MessageCircle, Search } from 'lucide-react-native';
+import { Compass, MessageCircle, Search } from '@/ui/icons';
 
 import { PostCard } from '@/components/PostCard';
 import { StoryRail } from '@/components/StoryRail';
@@ -27,10 +27,11 @@ export default function Home() {
 
   const items = useMemo(() => feed.data?.pages.flat() ?? [], [feed.data]);
 
-  const onViewable = useRef(({ viewableItems }: { viewableItems: ViewToken<FeedItem>[] }) => {
+  // must keep a stable identity: FlatList does not allow changing it on the fly
+  const onViewable = useCallback(({ viewableItems }: { viewableItems: ViewToken<FeedItem>[] }) => {
     const first = viewableItems.find((v) => v.isViewable);
     setActiveId(first?.item?.id ?? null);
-  }).current;
+  }, []);
 
   const renderItem = useCallback(
     ({ item }: { item: FeedItem }) => <PostCard post={item} me={userId} active={item.id === activeId} width={width} onMore={actions.open} />,

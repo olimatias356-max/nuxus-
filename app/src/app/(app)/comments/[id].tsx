@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MessageCircle, SendHorizontal } from 'lucide-react-native';
+import { Flag, MessageCircle, SendHorizontal, Trash } from '@/ui/icons';
 
 import { usePost } from '@/lib/api/posts';
 import { useAddComment, useComments, useDeleteComment } from '@/lib/api/social';
@@ -10,7 +10,7 @@ import { useMe } from '@/lib/auth';
 import { errorMessage } from '@/lib/errors';
 import { timeAgo } from '@/lib/format';
 import type { Comment } from '@/lib/types';
-import { Avatar, colors, EmptyState, fonts, Header, IconButton, Loading, radius, space, Text, useToast, VerifiedBadge } from '@/ui';
+import { ActionSheet, Avatar, colors, EmptyState, fonts, Header, IconButton, Loading, radius, space, Text, useToast, VerifiedBadge, type SheetAction } from '@/ui';
 
 export default function Comments() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,19 +32,31 @@ export default function Comments() {
     );
   };
 
-  const onLongPress = (c: Comment) => {
-    const canDelete = c.author_id === userId || post?.author_id === userId;
-    const buttons: any[] = [{ text: 'Cancelar', style: 'cancel' }];
-    if (canDelete)
-      buttons.push({
-        text: 'Eliminar',
-        style: 'destructive',
-        onPress: () => del.mutate({ id: c.id, postId: id }, { onError: (e) => toast(errorMessage(e), 'error') }),
-      });
-    if (c.author_id !== userId)
-      buttons.push({ text: 'Reportar', onPress: () => router.push({ pathname: '/report', params: { type: 'comment', id: c.id, name: c.author?.username ?? '' } }) });
-    Alert.alert('Comentario', undefined, buttons);
-  };
+  const [menu, setMenu] = useState<Comment | null>(null);
+  const menuActions: SheetAction[] = !menu
+    ? []
+    : [
+        ...(menu.author_id === userId || post?.author_id === userId
+          ? [
+              {
+                label: 'Eliminar comentario',
+                icon: Trash,
+                danger: true,
+                onPress: () => del.mutate({ id: menu.id, postId: id }, { onError: (e) => toast(errorMessage(e), 'error') }),
+              },
+            ]
+          : []),
+        ...(menu.author_id !== userId
+          ? [
+              {
+                label: 'Reportar comentario',
+                icon: Flag,
+                danger: true,
+                onPress: () => router.push({ pathname: '/report', params: { type: 'comment', id: menu.id, name: menu.author?.username ?? '' } }),
+              },
+            ]
+          : []),
+      ];
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -58,7 +70,7 @@ export default function Comments() {
           contentContainerStyle={{ paddingVertical: space[2], flexGrow: 1 }}
           ListEmptyComponent={<EmptyState icon={MessageCircle} title="Sin comentarios todavía" text="Empezá la conversación." />}
           renderItem={({ item }) => (
-            <Pressable onLongPress={() => onLongPress(item)} delayLongPress={350} style={styles.row} accessibilityHint="Mantené presionado para más opciones">
+            <Pressable onLongPress={() => setMenu(item)} delayLongPress={350} style={styles.row} accessibilityHint="Mantené presionado para más opciones">
               <Pressable onPress={() => item.author && router.push({ pathname: '/u/[username]', params: { username: item.author.username } })}>
                 <Avatar path={item.author?.avatar_path} name={item.author?.username ?? '?'} size={36} />
               </Pressable>
@@ -91,6 +103,7 @@ export default function Comments() {
         />
         <IconButton icon={SendHorizontal} label="Publicar comentario" onPress={send} disabled={!text.trim() || add.isPending} color={colors.accent} />
       </View>
+      <ActionSheet visible={!!menu} title="Comentario" actions={menuActions} onClose={() => setMenu(null)} />
     </KeyboardAvoidingView>
   );
 }

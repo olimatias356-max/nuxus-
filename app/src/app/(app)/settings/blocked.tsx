@@ -1,5 +1,5 @@
 import { FlatList, View } from 'react-native';
-import { Ban } from 'lucide-react-native';
+import { Ban } from '@/ui/icons';
 
 import { useBlocks, useUnblockUser } from '@/lib/api/social';
 import { useMe } from '@/lib/auth';

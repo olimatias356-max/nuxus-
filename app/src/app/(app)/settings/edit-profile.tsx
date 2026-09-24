@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { Camera } from 'lucide-react-native';
+import { Camera } from '@/ui/icons';
 
 import { useUpdateProfile } from '@/lib/api/social';
 import { useMe } from '@/lib/auth';

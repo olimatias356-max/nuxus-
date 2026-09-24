@@ -70,10 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile: profileQuery.data ?? null,
       initializing,
       profileLoading: !!userId && profileQuery.isLoading,
-      refreshProfile: () => profileQuery.refetch(),
+      refreshProfile: profileQuery.refetch,
       signOut,
     }),
-    [session, userId, profileQuery.data, profileQuery.isLoading, initializing, signOut, profileQuery],
+    [session, userId, profileQuery.data, profileQuery.isLoading, profileQuery.refetch, initializing, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

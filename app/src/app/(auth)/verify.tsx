@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { KeyRound } from 'lucide-react-native';
+import { KeyRound } from '@/ui/icons';
 
 import { errorMessage } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';

@@ -1,6 +1,6 @@
 import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { MessageCircle } from 'lucide-react-native';
+import { MessageCircle } from '@/ui/icons';
 
 import { useInbox } from '@/lib/api/activity';
 import { useMe } from '@/lib/auth';
@@ -33,7 +33,7 @@ export default function Inbox() {
                 onPress={() => router.push({ pathname: '/messages/[id]', params: { id: item.conversation_id } })}
                 accessibilityRole="button"
                 accessibilityLabel={`Conversación con ${item.other_display_name}${unread ? `, ${item.unread_count} sin leer` : ''}`}>
-                <Avatar path={item.other_avatar_path} name={item.other_username} size={52} />
+                <Avatar path={item.other_avatar_path} name={item.other_display_name} size={52} />
                 <View style={{ flex: 1, gap: 2 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                     <Text variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>

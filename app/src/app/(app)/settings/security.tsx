@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
-import { KeyRound, Lock, LogOut, Mail } from 'lucide-react-native';
+import { View } from 'react-native';
+import { KeyRound, Lock, LogOut, Mail } from '@/ui/icons';
 
 import { useMe } from '@/lib/auth';
 import { errorMessage } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 import { emailSchema, firstError, otpSchema, passwordSchema } from '@/lib/validation';
+import { confirmAction } from '@/lib/confirm';
 import { Button, Card, colors, Header, Input, ListRow, Screen, Section, space, Text, useToast } from '@/ui';
 
 export default function Security() {
@@ -108,12 +109,10 @@ export default function Security() {
               title="Cerrar sesión en todos los dispositivos"
               subtitle="Útil si perdiste un teléfono o sospechás de un acceso"
               danger
-              onPress={() =>
-                Alert.alert('¿Cerrar todas las sesiones?', 'Vas a tener que volver a entrar en todos tus dispositivos.', [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Cerrar todas', style: 'destructive', onPress: () => signOut(true) },
-                ])
-              }
+              onPress={async () => {
+                const ok = await confirmAction({ title: '¿Cerrar todas las sesiones?', message: 'Vas a tener que volver a entrar en todos tus dispositivos.', confirmText: 'Cerrar todas', destructive: true });
+                if (ok) signOut(true);
+              }}
             />
           </Section>
         </View>

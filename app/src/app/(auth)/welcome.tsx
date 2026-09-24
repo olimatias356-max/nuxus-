@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCheck, Heart, Play, TrendingUp } from 'lucide-react-native';
+import { BadgeCheck, Heart, Play, TrendingUp } from '@/ui/icons';
 
 import { Button, colors, fonts, radius, space, Text, Wordmark } from '@/ui';
 

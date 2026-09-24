@@ -2,7 +2,7 @@
 // Server-side validation errors (raised in SQL) are already user-facing.
 type AnyError = { message?: string; code?: string; status?: number; name?: string } | null | undefined;
 
-const AUTH_MESSAGES: Array<[RegExp, string]> = [
+const AUTH_MESSAGES: [RegExp, string][] = [
   [/invalid login credentials/i, 'Email o contraseña incorrectos.'],
   [/email not confirmed/i, 'Confirmá tu email con el código que te enviamos.'],
   [/user already registered|already been registered/i, 'Ya existe una cuenta con ese email.'],

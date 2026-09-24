@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CircleAlert, CircleCheck } from 'lucide-react-native';
+import { CircleAlert, CircleCheck } from '@/ui/icons';
 
 import { Text } from './Text';
 import { colors, radius, space } from './theme';
@@ -13,7 +13,7 @@ const ToastContext = createContext<(message: string, kind?: ToastKind) => void>(
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<ToastState>(null);
-  const anim = useRef(new Animated.Value(0)).current;
+  const [anim] = useState(() => new Animated.Value(0));
   const insets = useSafeAreaInsets();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 

@@ -1,5 +1,5 @@
 import { Linking, View } from 'react-native';
-import { LifeBuoy, Mail } from 'lucide-react-native';
+import { LifeBuoy, Mail } from '@/ui/icons';
 
 import { usePublicConfig } from '@/lib/api/config';
 import { useMe } from '@/lib/auth';

@@ -1,6 +1,6 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { Animated, StyleSheet } from 'react-native';
-import { Heart } from 'lucide-react-native';
+import { Heart } from '@/ui/icons';
 
 import { colors } from '@/ui';
 
@@ -8,8 +8,8 @@ export type HeartBurstHandle = { play: () => void };
 
 /** Big heart that pops over the media on double tap. */
 export const HeartBurst = forwardRef<HeartBurstHandle>(function HeartBurst(_, ref) {
-  const scale = useRef(new Animated.Value(0)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const [scale] = useState(() => new Animated.Value(0));
+  const [opacity] = useState(() => new Animated.Value(0));
   useImperativeHandle(ref, () => ({
     play: () => {
       scale.setValue(0.3);

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { router } from 'expo-router';
-import { Clock, Play } from 'lucide-react-native';
+import { Clock, Play } from '@/ui/icons';
 
 import { formatCount } from '@/lib/format';
 import type { FeedItem } from '@/lib/types';

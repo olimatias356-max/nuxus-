@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { router, Stack } from 'expo-router';
-import { ShieldAlert } from 'lucide-react-native';
+import { ShieldAlert } from '@/ui/icons';
 
 import { useAuth } from '@/lib/auth';
 import { Button, colors, EmptyState, Loading, Screen, space } from '@/ui';

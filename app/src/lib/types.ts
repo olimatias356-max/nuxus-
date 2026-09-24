@@ -159,7 +159,7 @@ export type CreatorStats = {
   followers: number;
   new_followers_7d: number;
   avg_retention: number | null;
-  top_posts: Array<Pick<FeedItem, 'id' | 'kind' | 'thumb_path' | 'media_path' | 'view_count' | 'like_count' | 'comment_count'>>;
+  top_posts: Pick<FeedItem, 'id' | 'kind' | 'thumb_path' | 'media_path' | 'view_count' | 'like_count' | 'comment_count'>[];
 };
 
 export type Plan = {

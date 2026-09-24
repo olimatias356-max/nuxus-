@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { Pressable, RefreshControl, SectionList, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCheck, Bell, CircleDollarSign, Heart, MessageCircle, ShieldAlert, ShieldCheck, UserPlus, Wallet, type LucideIcon } from 'lucide-react-native';
+import { BadgeCheck, Bell, CircleDollarSign, Heart, MessageCircle, ShieldAlert, ShieldCheck, UserPlus, Wallet, type LucideIcon } from '@/ui/icons';
 
 import { MediaImage } from '@/components/Media';
 import { useMarkNotificationsRead, useNotifications } from '@/lib/api/activity';

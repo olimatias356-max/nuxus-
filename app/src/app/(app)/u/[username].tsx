@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { UserX } from 'lucide-react-native';
+import { UserX } from '@/ui/icons';
 
 import { ProfileView } from '@/components/ProfileView';
 import { useProfile } from '@/lib/api/social';

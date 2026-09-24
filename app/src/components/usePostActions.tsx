@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Alert, Share } from 'react-native';
+import { Share } from 'react-native';
 import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
-import { Ban, Flag, Link2, Pencil, Trash } from 'lucide-react-native';
+import { Ban, Flag, Link2, Pencil, Trash } from '@/ui/icons';
 
 import { useBlockUser } from '@/lib/api/social';
 import { useDeletePost } from '@/lib/api/posts';
 import { errorMessage } from '@/lib/errors';
 import type { FeedItem } from '@/lib/types';
+import { confirmAction } from '@/lib/confirm';
 import { ActionSheet, useToast, type SheetAction } from '@/ui';
 
 export function sharePost(post: Pick<FeedItem, 'id' | 'author_username'>) {
@@ -33,19 +34,10 @@ export function usePostActions(me: string) {
             label: 'Eliminar publicación',
             icon: Trash,
             danger: true,
-            onPress: () =>
-              Alert.alert('¿Eliminar publicación?', 'Se borra para siempre, junto con sus likes y comentarios.', [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                  text: 'Eliminar',
-                  style: 'destructive',
-                  onPress: () =>
-                    del.mutate(post, {
-                      onSuccess: () => toast('Publicación eliminada'),
-                      onError: (e) => toast(errorMessage(e), 'error'),
-                    }),
-                },
-              ]),
+            onPress: async () => {
+              const ok = await confirmAction({ title: '¿Eliminar publicación?', message: 'Se borra para siempre, junto con sus likes y comentarios.', confirmText: 'Eliminar', destructive: true });
+              if (ok) del.mutate(post, { onSuccess: () => toast('Publicación eliminada'), onError: (e) => toast(errorMessage(e), 'error') });
+            },
           },
         ]
       : [
@@ -62,19 +54,10 @@ export function usePostActions(me: string) {
             icon: Ban,
             danger: true,
             hint: 'No verás su contenido y no podrá contactarte',
-            onPress: () =>
-              Alert.alert(`¿Bloquear a @${post.author_username}?`, 'No verás su contenido y no podrá interactuar con vos. Podés desbloquearlo desde Ajustes.', [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                  text: 'Bloquear',
-                  style: 'destructive',
-                  onPress: () =>
-                    block.mutate(
-                      { target: post.author_id },
-                      { onSuccess: () => toast('Usuario bloqueado'), onError: (e) => toast(errorMessage(e), 'error') },
-                    ),
-                },
-              ]),
+            onPress: async () => {
+              const ok = await confirmAction({ title: `¿Bloquear a @${post.author_username}?`, message: 'No verás su contenido y no podrá interactuar con vos. Podés desbloquearlo desde Ajustes.', confirmText: 'Bloquear', destructive: true });
+              if (ok) block.mutate({ target: post.author_id }, { onSuccess: () => toast('Usuario bloqueado'), onError: (e) => toast(errorMessage(e), 'error') });
+            },
           },
         ];
 

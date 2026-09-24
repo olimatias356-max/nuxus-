@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { Landmark, Lock } from 'lucide-react-native';
+import { Landmark, Lock } from '@/ui/icons';
 
 import { useMonetization, useUpsertBankAccount } from '@/lib/api/money';
 import { errorMessage } from '@/lib/errors';

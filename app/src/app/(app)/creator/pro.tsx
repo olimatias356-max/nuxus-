@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Check, Crown } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { Check, Crown } from '@/ui/icons';
 
 import { invalidateMoney, useMonetization, usePlans } from '@/lib/api/money';
 import { useMe } from '@/lib/auth';
@@ -60,7 +61,9 @@ export default function Pro() {
         scroll
         footer={
           current ? (
-            <Button title={`Administrar en ${current.channel === 'app_store' ? 'App Store' : current.channel === 'google_play' ? 'Google Play' : 'la tienda'}`} variant="secondary" onPress={() => openManageSubscriptions(current.channel)} />
+            current.channel === 'sandbox' || current.channel === 'web' ? null : (
+              <Button title={`Administrar en ${current.channel === 'app_store' ? 'App Store' : 'Google Play'}`} variant="secondary" onPress={() => openManageSubscriptions(current.channel)} />
+            )
           ) : plan ? (
             <View style={{ gap: space[2] }}>
               <Button title={`Suscribirme · ${formatMoney(plan.prices[currency] ?? 0, currency, decimals)}/mes`} onPress={buy} loading={buying} icon={Crown} />
@@ -82,9 +85,20 @@ export default function Pro() {
                 {current.status === 'canceled'
                   ? `Seguís con Pro hasta el ${formatDate(current.current_period_end)}.`
                   : `Se renueva el ${formatDate(current.current_period_end)}.`}
+                {current.channel === 'sandbox' ? ' Suscripción de prueba (sin cobro).' : ''}
               </Text>
             </Card>
-          ) : (
+          ) : null}
+          {current && m?.kyc.status !== 'VERIFIED' ? (
+            <Card>
+              <Text variant="bodyStrong">Siguiente paso: verificá tu identidad</Text>
+              <Text variant="small" tone="muted" style={{ marginTop: space[1] }}>
+                Para retirar necesitás identidad verificada y una cuenta bancaria a tu nombre.
+              </Text>
+              <Button title="Verificar identidad" size="md" style={{ marginTop: space[3] }} onPress={() => router.push('/creator/kyc')} />
+            </Card>
+          ) : null}
+          {current ? null : (
             <View style={{ gap: space[2] }}>
               <Text variant="title">Retirá lo que ganás</Text>
               <Text variant="body" tone="muted">

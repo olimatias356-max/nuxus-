@@ -1,11 +1,12 @@
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
-import { Flag } from 'lucide-react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Flag } from '@/ui/icons';
 
 import { MediaImage } from '@/components/Media';
 import { useAdminReports, useResolveReport } from '@/lib/api/admin';
 import { errorMessage } from '@/lib/errors';
 import { timeAgo } from '@/lib/format';
 import type { AdminReport } from '@/lib/types';
+import { confirmAction } from '@/lib/confirm';
 import { Button, Card, colors, EmptyState, ErrorState, Header, Loading, Pill, radius, space, Text, useToast } from '@/ui';
 
 const REASON: Record<string, string> = {
@@ -18,19 +19,14 @@ export default function Reports() {
   const resolve = useResolveReport();
   const toast = useToast();
 
-  const act = (r: AdminReport, action: 'dismiss' | 'remove' | 'restore' | 'suspend_user', label: string) =>
-    Alert.alert(label, '¿Confirmás esta acción?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Confirmar',
-        style: action === 'dismiss' || action === 'restore' ? 'default' : 'destructive',
-        onPress: () =>
-          resolve.mutate(
-            { targetType: r.target_type, targetId: r.target_id, action, note: label },
-            { onSuccess: () => toast('Listo'), onError: (e) => toast(errorMessage(e), 'error') },
-          ),
-      },
-    ]);
+  const act = async (r: AdminReport, action: 'dismiss' | 'remove' | 'restore' | 'suspend_user', label: string) => {
+    const ok = await confirmAction({ title: label, message: '¿Confirmás esta acción?', confirmText: 'Confirmar', destructive: action === 'remove' || action === 'suspend_user' });
+    if (ok)
+      resolve.mutate(
+        { targetType: r.target_type, targetId: r.target_id, action, note: label },
+        { onSuccess: () => toast('Listo'), onError: (e) => toast(errorMessage(e), 'error') },
+      );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>

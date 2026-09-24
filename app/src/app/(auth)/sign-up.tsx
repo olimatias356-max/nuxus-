@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { AtSign, Calendar, Check, Lock, Mail, User } from 'lucide-react-native';
+import { AtSign, Calendar, Check, Lock, Mail, User } from '@/ui/icons';
 
 import { env } from '@/lib/env';
 import { errorMessage } from '@/lib/errors';
@@ -39,25 +39,31 @@ export default function SignUp() {
   const [country, setCountry] = useState('PY');
   const [accepted, setAccepted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
-  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'ok' | 'taken'>('idle');
+  const [usernameCheck, setUsernameCheck] = useState<{ name: string; problem: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
-  const refs = { password: useRef<TextInput>(null), username: useRef<TextInput>(null), name: useRef<TextInput>(null), birth: useRef<TextInput>(null) };
+  const passwordRef = useRef<TextInput>(null);
+  const usernameRef = useRef<TextInput>(null);
+  const nameRef = useRef<TextInput>(null);
+  const birthRef = useRef<TextInput>(null);
+
+  const normalizedUsername = username.trim().toLowerCase();
+  const usernameValid = usernameSchema.safeParse(normalizedUsername).success;
+  const usernameStatus: 'idle' | 'checking' | 'ok' | 'taken' = !usernameValid
+    ? 'idle'
+    : usernameCheck?.name !== normalizedUsername
+      ? 'checking'
+      : usernameCheck.problem
+        ? 'taken'
+        : 'ok';
 
   useEffect(() => {
-    const value = username.trim().toLowerCase();
-    if (!usernameSchema.safeParse(value).success) {
-      setUsernameStatus('idle');
-      return;
-    }
-    setUsernameStatus('checking');
+    if (!usernameValid) return;
     const t = setTimeout(async () => {
-      const { data, error } = await supabase.rpc('check_username', { p_username: value });
-      if (error) return setUsernameStatus('idle');
-      setUsernameStatus(data ? 'taken' : 'ok');
-      setErrors((e) => ({ ...e, username: data ?? null }));
+      const { data, error } = await supabase.rpc('check_username', { p_username: normalizedUsername });
+      if (!error) setUsernameCheck({ name: normalizedUsername, problem: (data as string | null) ?? null });
     }, 450);
     return () => clearTimeout(t);
-  }, [username]);
+  }, [normalizedUsername, usernameValid]);
 
   const passwordChecks = [
     { ok: password.length >= 8, label: '8+ caracteres' },
@@ -71,7 +77,7 @@ export default function SignUp() {
     next.email = firstError(e);
     next.password = firstError(passwordSchema.safeParse(password));
     const u = usernameSchema.safeParse(username);
-    next.username = firstError(u) ?? (usernameStatus === 'taken' ? 'Ese nombre de usuario ya está en uso.' : null);
+    next.username = firstError(u) ?? (usernameStatus === 'taken' ? (usernameCheck?.problem ?? 'Ese nombre de usuario no está disponible.') : null);
     next.displayName = firstError(displayNameSchema.safeParse(displayName));
     const iso = parseBirthDate(birth);
     next.birth = !iso ? 'Usá el formato DD/MM/AAAA.' : ageFrom(iso) < 18 ? 'Tenés que tener al menos 18 años.' : null;
@@ -114,10 +120,10 @@ export default function SignUp() {
           </Text>
         </View>
 
-        <Input label="Email" icon={Mail} value={email} onChangeText={setEmail} autoCapitalize="none" autoComplete="email" textContentType="emailAddress" keyboardType="email-address" returnKeyType="next" onSubmitEditing={() => refs.password.current?.focus()} error={errors.email} placeholder="vos@ejemplo.com" />
+        <Input label="Email" icon={Mail} value={email} onChangeText={setEmail} autoCapitalize="none" autoComplete="email" textContentType="emailAddress" keyboardType="email-address" returnKeyType="next" onSubmitEditing={() => passwordRef.current?.focus()} error={errors.email} placeholder="vos@ejemplo.com" />
 
         <View style={{ gap: space[2] }}>
-          <Input ref={refs.password} label="Contraseña" icon={Lock} value={password} onChangeText={setPassword} secureTextEntry secureToggle autoComplete="new-password" textContentType="newPassword" returnKeyType="next" onSubmitEditing={() => refs.username.current?.focus()} error={errors.password} />
+          <Input ref={passwordRef} label="Contraseña" icon={Lock} value={password} onChangeText={setPassword} secureTextEntry secureToggle autoComplete="new-password" textContentType="newPassword" returnKeyType="next" onSubmitEditing={() => usernameRef.current?.focus()} error={errors.password} />
           <View style={styles.checks}>
             {passwordChecks.map((c) => (
               <View key={c.label} style={styles.check}>
@@ -131,7 +137,7 @@ export default function SignUp() {
         </View>
 
         <Input
-          ref={refs.username}
+          ref={usernameRef}
           label="Usuario"
           icon={AtSign}
           value={username}
@@ -142,13 +148,14 @@ export default function SignUp() {
           textContentType="username"
           maxLength={24}
           returnKeyType="next"
-          onSubmitEditing={() => refs.name.current?.focus()}
-          error={errors.username}
-          hint={usernameStatus === 'ok' ? '✓ Disponible' : usernameStatus === 'checking' ? 'Verificando…' : 'Así te van a encontrar: mbaretefans/@usuario'}
+          onSubmitEditing={() => nameRef.current?.focus()}
+          error={errors.username ?? (usernameStatus === 'taken' ? usernameCheck?.problem : null)}
+          hint={usernameStatus === 'ok' ? '✓ Disponible' : usernameStatus === 'checking' ? 'Verificando…' : 'Así te van a encontrar: @usuario'}
+          hintTone={usernameStatus === 'ok' ? 'accent' : 'subtle'}
           placeholder="tu.usuario"
         />
-        <Input ref={refs.name} label="Nombre visible" icon={User} value={displayName} onChangeText={setDisplayName} autoComplete="name" textContentType="name" maxLength={50} returnKeyType="next" onSubmitEditing={() => refs.birth.current?.focus()} error={errors.displayName} placeholder="Como querés que te vean" />
-        <Input ref={refs.birth} label="Fecha de nacimiento" icon={Calendar} value={birth} onChangeText={(v) => setBirth(formatBirth(v))} keyboardType="number-pad" autoComplete="birthdate-full" maxLength={10} error={errors.birth} hint="Es privada. Necesitás 18 años o más." placeholder="DD/MM/AAAA" />
+        <Input ref={nameRef} label="Nombre visible" icon={User} value={displayName} onChangeText={setDisplayName} autoComplete="name" textContentType="name" maxLength={50} returnKeyType="next" onSubmitEditing={() => birthRef.current?.focus()} error={errors.displayName} placeholder="Como querés que te vean" />
+        <Input ref={birthRef} label="Fecha de nacimiento" icon={Calendar} value={birth} onChangeText={(v) => setBirth(formatBirth(v))} keyboardType="number-pad" autoComplete="birthdate-full" maxLength={10} error={errors.birth} hint="Es privada. Necesitás 18 años o más." placeholder="DD/MM/AAAA" />
 
         <View style={{ gap: space[2] }}>
           <Text variant="smallStrong" tone="muted">

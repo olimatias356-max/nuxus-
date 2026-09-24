@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { Camera, IdCard, Lock, ScanFace, ShieldCheck, type LucideIcon } from 'lucide-react-native';
+import { Camera, IdCard, Lock, ScanFace, ShieldCheck, type LucideIcon } from '@/ui/icons';
 
 import { useMonetization, useSubmitKyc, type KycInput } from '@/lib/api/money';
 import { useMe } from '@/lib/auth';
@@ -11,7 +11,7 @@ import { MediaError, pickMedia, type PickedMedia } from '@/lib/media';
 import { Button, Card, colors, EmptyState, Header, Input, Loading, radius, Screen, space, Text, useToast } from '@/ui';
 import { KycPill } from '@/components/creator';
 
-const DOCS: Array<{ value: KycInput['documentType']; label: string; back: boolean }> = [
+const DOCS: { value: KycInput['documentType']; label: string; back: boolean }[] = [
   { value: 'ci', label: 'Cédula (CI)', back: true },
   { value: 'dni', label: 'DNI', back: true },
   { value: 'cpf', label: 'CPF / RG', back: true },

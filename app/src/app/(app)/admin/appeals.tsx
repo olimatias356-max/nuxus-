@@ -1,5 +1,5 @@
 import { FlatList, View } from 'react-native';
-import { Gavel } from 'lucide-react-native';
+import { Gavel } from '@/ui/icons';
 
 import { useAdminAppeals, useResolveAppeal } from '@/lib/api/admin';
 import { errorMessage } from '@/lib/errors';

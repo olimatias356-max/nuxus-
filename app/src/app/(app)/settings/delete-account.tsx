@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { TriangleAlert } from 'lucide-react-native';
+import { TriangleAlert } from '@/ui/icons';
 
 import { deleteMyAccount } from '@/lib/api/config';
 import { useMonetization } from '@/lib/api/money';

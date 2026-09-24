@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, useWindowDimensions, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ImageOff } from 'lucide-react-native';
+import { ImageOff } from '@/ui/icons';
 
 import { PostCard } from '@/components/PostCard';
 import { usePostActions } from '@/components/usePostActions';

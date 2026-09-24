@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './Text';
 import { colors, radius } from './theme';
 
-type Props<T extends string> = { value: T; options: Array<{ value: T; label: string }>; onChange: (v: T) => void };
+type Props<T extends string> = { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void };
 
 export function Segmented<T extends string>({ value, options, onChange }: Props<T>) {
   return (

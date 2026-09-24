@@ -1,6 +1,6 @@
 import { forwardRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
-import { Eye, EyeOff, type LucideIcon } from 'lucide-react-native';
+import { Eye, EyeOff, type LucideIcon } from '@/ui/icons';
 
 import { Text } from './Text';
 import { colors, fonts, radius } from './theme';
@@ -11,10 +11,11 @@ export type InputProps = TextInputProps & {
   hint?: string;
   icon?: LucideIcon;
   secureToggle?: boolean;
+  hintTone?: 'subtle' | 'accent' | 'warning';
 };
 
 export const Input = forwardRef<TextInput, InputProps>(function Input(
-  { label, error, hint, icon: Icon, secureToggle, secureTextEntry, style, multiline, ...rest },
+  { label, error, hint, hintTone = 'subtle', icon: Icon, secureToggle, secureTextEntry, style, multiline, ...rest },
   ref,
 ) {
   const [focused, setFocused] = useState(false);
@@ -68,7 +69,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
           {error}
         </Text>
       ) : hint ? (
-        <Text variant="small" tone="subtle" style={styles.helper}>
+        <Text variant="small" tone={hintTone} style={styles.helper}>
           {hint}
         </Text>
       ) : null}

@@ -1,5 +1,5 @@
 import { FlatList, StyleSheet, View } from 'react-native';
-import { Receipt } from 'lucide-react-native';
+import { Receipt } from '@/ui/icons';
 
 import { useLedger } from '@/lib/api/money';
 import { errorMessage } from '@/lib/errors';

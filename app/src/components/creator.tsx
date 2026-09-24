@@ -1,4 +1,4 @@
-import { BadgeCheck } from 'lucide-react-native';
+import { BadgeCheck } from '@/ui/icons';
 
 import { formatMoney } from '@/lib/format';
 import type { Monetization, WithdrawBlocker } from '@/lib/types';

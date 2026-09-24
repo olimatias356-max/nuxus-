@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { ArrowDownToLine } from 'lucide-react-native';
+import { ArrowDownToLine } from '@/ui/icons';
 
 import { useMonetization, useRequestPayout } from '@/lib/api/money';
 import { errorMessage } from '@/lib/errors';

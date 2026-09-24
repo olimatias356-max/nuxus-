@@ -61,9 +61,13 @@ function ActiveVideo({ url, muted, contentFit, loop, onProgress, onEnd }: { url:
   });
   const { status } = useEvent(player, 'statusChange', { status: player.status });
   const progressRef = useRef(onProgress);
-  progressRef.current = onProgress;
+  useEffect(() => {
+    progressRef.current = onProgress;
+  }, [onProgress]);
 
   useEffect(() => {
+    // expo-video players are native shared objects configured by mutation.
+    // eslint-disable-next-line react-hooks/immutability
     player.muted = muted;
   }, [muted, player]);
 

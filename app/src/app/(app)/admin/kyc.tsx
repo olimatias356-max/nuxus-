@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
-import { IdCard } from 'lucide-react-native';
+import { IdCard } from '@/ui/icons';
 
 import { kycDocumentUrl, useAdminKyc, useReviewKyc } from '@/lib/api/admin';
 import { errorMessage } from '@/lib/errors';
 import { timeAgo } from '@/lib/format';
 import type { AdminKyc } from '@/lib/types';
+import { confirmAction } from '@/lib/confirm';
 import { Button, Card, colors, EmptyState, ErrorState, Header, Input, Loading, Pill, radius, space, Text, useToast } from '@/ui';
 
 export default function KycQueue() {
@@ -43,19 +44,19 @@ function KycCard({ k }: { k: AdminKyc }) {
   const review = useReviewKyc();
   const toast = useToast();
   const [reason, setReason] = useState('');
-  const decide = (decision: 'approve' | 'reject' | 'suspend') => {
+  const decide = async (decision: 'approve' | 'reject' | 'suspend') => {
     if (decision !== 'approve' && reason.trim().length < 5) return toast('Indicá el motivo.', 'error');
-    Alert.alert(decision === 'approve' ? 'Aprobar identidad' : decision === 'reject' ? 'Rechazar' : 'Suspender identidad', '¿Confirmás?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Confirmar',
-        onPress: () =>
-          review.mutate(
-            { userId: k.user_id, decision, reason: reason.trim() || undefined },
-            { onSuccess: () => toast('Listo'), onError: (e) => toast(errorMessage(e), 'error') },
-          ),
-      },
-    ]);
+    const ok = await confirmAction({
+      title: decision === 'approve' ? 'Aprobar identidad' : decision === 'reject' ? 'Rechazar' : 'Suspender identidad',
+      message: '¿Confirmás?',
+      confirmText: 'Confirmar',
+      destructive: decision !== 'approve',
+    });
+    if (ok)
+      review.mutate(
+        { userId: k.user_id, decision, reason: reason.trim() || undefined },
+        { onSuccess: () => toast('Listo'), onError: (e) => toast(errorMessage(e), 'error') },
+      );
   };
   return (
     <Card>

@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View, type LayoutChangeEvent, type ViewToken } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Clapperboard, Search } from 'lucide-react-native';
+import { Clapperboard, Search } from '@/ui/icons';
 
 import { ReelItem } from '@/components/ReelItem';
 import { usePostActions } from '@/components/usePostActions';
@@ -29,9 +29,9 @@ export default function Reels() {
     }, []),
   );
 
-  const onViewable = useRef(({ viewableItems }: { viewableItems: ViewToken<FeedItem>[] }) => {
+  const onViewable = useCallback(({ viewableItems }: { viewableItems: ViewToken<FeedItem>[] }) => {
     setActiveId(viewableItems.find((v) => v.isViewable)?.item?.id ?? null);
-  }).current;
+  }, []);
 
   const onLayout = (e: LayoutChangeEvent) => setHeight(Math.round(e.nativeEvent.layout.height));
 
