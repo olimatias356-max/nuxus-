@@ -1,0 +1,80 @@
+name: Android APK (pruebas)
+
+# Builds an installable APK for testing on real phones and uploads it as a
+# downloadable ZIP artifact. Run it from Actions → "Android APK (pruebas)" →
+# Run workflow. The Supabase URL and publishable key are public client values
+# (the same ones embedded in any build); never pass the service role key here.
+# Defaults point at the separate test project "mbaretefans-v2-pruebas".
+on:
+  workflow_dispatch:
+    inputs:
+      supabase_url:
+        description: URL del proyecto Supabase (https://<ref>.supabase.co)
+        required: true
+        default: https://wgydhxahxzeymiukmfcw.supabase.co
+      supabase_key:
+        description: Clave publicable de Supabase (sb_publishable_… o anon)
+        required: true
+        default: sb_publishable_dp-WDL6m54zYZ2CkWEIX0A_5oBkoLGg
+      web_url:
+        description: URL del sitio web / portal de creadores
+        required: false
+        default: https://mbaretefans.com
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    defaults:
+      run:
+        working-directory: app
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: ${{ inputs.supabase_url }}
+      EXPO_PUBLIC_SUPABASE_KEY: ${{ inputs.supabase_key }}
+      EXPO_PUBLIC_WEB_URL: ${{ inputs.web_url }}
+      EXPO_NO_TELEMETRY: 1
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci
+      - name: Generate the native Android project
+        run: npx expo prebuild --platform android --no-install --clean
+      - name: Assemble release APK
+        working-directory: app/android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+      - name: Package ZIP contents
+        run: |
+          mkdir -p ../dist-apk
+          cp android/app/build/outputs/apk/release/app-release.apk ../dist-apk/MbareteFans-pruebas.apk
+          cat > ../dist-apk/LEEME.txt <<EOF
+          MbareteFans — APK de pruebas (commit ${GITHUB_SHA::7})
+
+          1. Copiá MbareteFans-pruebas.apk al teléfono Android (o descargalo desde el teléfono).
+          2. Abrilo y permití "Instalar apps desconocidas" para tu navegador o gestor de archivos.
+          3. Los anuncios son de prueba de Google (dicen "Test Ad"): no generan ingresos reales.
+
+          Backend: ${EXPO_PUBLIC_SUPABASE_URL}
+          Web: ${EXPO_PUBLIC_WEB_URL}
+          Firmado con la clave de depuración: solo para pruebas, no para Google Play.
+          EOF
+          sha256sum ../dist-apk/MbareteFans-pruebas.apk | tee ../dist-apk/SHA256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MbareteFans-android-apk
+          path: dist-apk/
+          retention-days: 30
