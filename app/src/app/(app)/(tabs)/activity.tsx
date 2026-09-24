@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BadgeCheck, Bell, CircleDollarSign, Heart, MessageCircle, ShieldAlert, ShieldCheck, UserPlus, Wallet, type LucideIcon } from '@/ui/icons';
 
 import { MediaImage } from '@/components/Media';
+import { PushPrompt } from '@/components/PushPrompt';
 import { useMarkNotificationsRead, useNotifications } from '@/lib/api/activity';
 import { usePost } from '@/lib/api/posts';
 import { errorMessage } from '@/lib/errors';
@@ -83,6 +84,7 @@ export default function Activity() {
           sections={sections}
           keyExtractor={(n) => n.id}
           stickySectionHeadersEnabled={false}
+          ListHeaderComponent={<PushPrompt />}
           refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={() => q.refetch()} tintColor={colors.accent} colors={[colors.accent]} />}
           renderSectionHeader={({ section }) => (
             <Text variant="smallStrong" tone="subtle" style={styles.section}>

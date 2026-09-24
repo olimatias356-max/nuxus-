@@ -228,6 +228,23 @@ test('earnings, withdrawal and signed payout webhook', async () => {
   assert.equal(m.balances.PROCESSING, 0);
 });
 
+test('push: device tokens and the dispatcher', async () => {
+  const token = `ExponentPushToken[e2e${run}abcdefghij]`;
+  assert.ifError((await S.creator.c.rpc('register_push_token', { p_token: token, p_platform: 'android' })).error);
+  const bad = await S.creator.c.rpc('register_push_token', { p_token: 'https://evil.example', p_platform: 'android' });
+  assert.ok(bad.error, 'arbitrary endpoints are rejected');
+  assert.ifError((await S.fan.c.from('messages').insert({ conversation_id: S.conv, body: 'secreto 1234' })).error);
+  const { rows } = await db.query(`select body from private.push_queue where user_id = $1 order by id desc limit 1`, [S.creator.user.id]);
+  assert.equal(rows[0]?.body, 'Te envió un mensaje', 'message text is not sent in the push');
+
+  const denied = await fetch(`${URL_}/functions/v1/push-dispatch`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+  assert.equal(denied.status, 401);
+  const res = await fetch(`${URL_}/functions/v1/push-dispatch`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${SERVICE}` }, body: '{}' });
+  assert.equal(res.status, 200);
+  const out = await res.json();
+  assert.ok(out.claimed >= 1, 'pending pushes are claimed');
+});
+
 test('blocking hides content and private files', async () => {
   assert.ifError((await S.creator.c.from('blocks').insert({ blocked_id: S.fan.user.id })).error);
   const { data: posts } = await S.fan.c.from('posts').select('id').eq('id', S.post.id);

@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import { useQuery } from '@tanstack/react-query';
 
 import { queryClient } from './query';
+import { disablePush } from './push';
 import { clearSignedUrls } from './signed-urls';
 import { supabase } from './supabase';
 import type { Profile } from './types';
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const signOut = useCallback(async (everywhere = false) => {
+    await disablePush().catch(() => {});
     await supabase.auth.signOut({ scope: everywhere ? 'global' : 'local' });
   }, []);
 

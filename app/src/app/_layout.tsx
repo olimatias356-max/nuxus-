@@ -19,6 +19,7 @@ import { AuthProvider, useAuth } from '@/lib/auth';
 import { isConfigured } from '@/lib/env';
 import { queryClient } from '@/lib/query';
 import { useRealtimeActivity } from '@/lib/api/activity';
+import { usePushNotifications } from '@/lib/push';
 import { colors, ToastProvider } from '@/ui';
 import SetupScreen from '@/components/SetupScreen';
 
@@ -32,6 +33,7 @@ const theme = {
 function RootNavigator() {
   const { session, initializing, userId } = useAuth();
   useRealtimeActivity(userId);
+  usePushNotifications(userId);
 
   useEffect(() => {
     if (!initializing) SplashScreen.hideAsync().catch(() => {});

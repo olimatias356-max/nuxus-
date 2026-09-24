@@ -86,5 +86,8 @@ verify_jwt = true
 [functions.billing-webhook]
 verify_jwt = false
 
+[functions.push-dispatch]
+verify_jwt = false
+
 [functions.payout-webhook]
 verify_jwt = false
