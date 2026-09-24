@@ -1,0 +1,12 @@
+{
+  "name": "mbaretefans-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 --test-timeout=120000"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.1",
+    "pg": "^8.16.0"
+  }
+}

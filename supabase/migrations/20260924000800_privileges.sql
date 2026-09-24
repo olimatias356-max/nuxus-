@@ -22,6 +22,7 @@ grant execute on function public.check_username(text) to anon, authenticated;
 -- Signed-in users
 grant execute on function public.my_admin_roles() to authenticated;
 grant execute on function public.search_profiles(text, integer) to authenticated;
+grant execute on function public.get_my_blocks() to authenticated;
 grant execute on function public.get_feed(text, integer, integer) to authenticated;
 grant execute on function public.get_posts(uuid, uuid, boolean, integer, integer) to authenticated;
 grant execute on function public.get_story_rail() to authenticated;

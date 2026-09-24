@@ -82,6 +82,21 @@ create policy "users block others" on public.blocks
 create policy "users unblock" on public.blocks
   for delete to authenticated using (blocker_id = (select auth.uid()));
 
+-- The blocker can list whom they blocked (profiles RLS hides them otherwise).
+create function public.get_my_blocks()
+returns table (user_id uuid, username text, display_name text, avatar_path text, blocked_at timestamptz)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p.id, p.username, p.display_name, p.avatar_path, b.created_at
+  from public.blocks b
+  join public.profiles p on p.id = b.blocked_id
+  where b.blocker_id = (select auth.uid())
+  order by b.created_at desc
+$$;
+
 -- Is there a block in either direction between the caller and p_other?
 create function private.is_blocked_with(p_other uuid)
 returns boolean

@@ -480,3 +480,46 @@ begin
   return jsonb_build_object('stories_deleted', v_stories, 'rate_limit_rows_deleted', v_limits);
 end;
 $$;
+
+-- Audit entries written by Edge Functions.
+create function public.svc_audit(p_action text, p_target_table text, p_target_id text, p_details jsonb default '{}'::jsonb)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform private.assert_service_role();
+  perform private.audit(p_action, p_target_table, p_target_id, null, p_details, null);
+end;
+$$;
+
+-- Uploaded files that never got attached to content (abandoned uploads).
+create function public.svc_orphan_objects(p_limit integer default 500)
+returns table (bucket_id text, name text)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  perform private.assert_service_role();
+  return query
+  select o.bucket_id, o.name
+  from storage.objects o
+  where (
+      o.bucket_id = 'media' and o.created_at < now() - interval '24 hours'
+      and not exists (select 1 from public.posts p where p.media_path = o.name or p.thumb_path = o.name)
+      and not exists (select 1 from public.stories s where s.media_path = o.name)
+    ) or (
+      o.bucket_id = 'avatars' and o.created_at < now() - interval '24 hours'
+      and not exists (select 1 from public.profiles pr where pr.avatar_path = o.name)
+    ) or (
+      o.bucket_id = 'kyc' and o.created_at < now() - interval '7 days'
+      and not exists (select 1 from private.kyc_documents d
+                      where o.name in (d.front_path, d.back_path, d.selfie_path))
+    )
+  order by o.created_at
+  limit least(greatest(p_limit, 1), 1000);
+end;
+$$;

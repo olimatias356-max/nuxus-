@@ -1,0 +1,72 @@
+{
+  "expo": {
+    "name": "MbareteFans",
+    "slug": "mbaretefans",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "mbaretefans",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0A0F",
+    "primaryColor": "#C8FF3D",
+    "description": "La red de creadores de Paraguay para LATAM.",
+    "ios": {
+      "bundleIdentifier": "com.mbaretefans.app",
+      "supportsTablet": false,
+      "icon": "./assets/images/icon.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "MbareteFans usa la cámara para que grabes videos, saques fotos y verifiques tu identidad.",
+        "NSMicrophoneUsageDescription": "MbareteFans usa el micrófono para grabar el audio de tus videos.",
+        "NSPhotoLibraryUsageDescription": "MbareteFans necesita acceso a tus fotos para que puedas publicarlas."
+      }
+    },
+    "android": {
+      "package": "com.mbaretefans.app",
+      "allowBackup": false,
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0A0F",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png",
+      "backgroundColor": "#0A0A0F"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0A0A0F",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 96
+        }
+      ],
+      "expo-secure-store",
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "MbareteFans necesita acceso a tus fotos para que puedas publicarlas.",
+          "cameraPermission": "MbareteFans usa la cámara para que grabes videos, saques fotos y verifiques tu identidad.",
+          "microphonePermission": "MbareteFans usa el micrófono para grabar el audio de tus videos."
+        }
+      ],
+      "expo-iap",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
