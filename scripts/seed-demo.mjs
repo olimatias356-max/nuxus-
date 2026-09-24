@@ -4,8 +4,13 @@
 //
 //   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/seed-demo.mjs
 //
+// Optional DEMO_REELS_DIR: a folder with r1.webm/r1.jpg, r2.webm/r2.jpg, ...
+// (vertical 9:16 clips + cover) that are published as reels.
+//
 // Uses the service role key only to create confirmed users (admin API);
 // everything else is done as each demo user, through RLS.
+import fs from 'node:fs';
+import path from 'node:path';
 import zlib from 'node:zlib';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
@@ -144,6 +149,33 @@ for (const [i, c] of CREATORS.entries()) {
   }
   users.push(u);
   console.log('✓', c.username);
+}
+
+// optional reels (vertical videos with a cover image)
+const REELS = [
+  ['dona.rosa', 'Chipa en 60 segundos 🔥 receta de la abuela', 'cocina'],
+  ['futbol.cde', 'El golazo del domingo ⚽', 'deportes'],
+  ['arpa.luque', 'Guarania en vivo desde Luque 🎶', 'musica'],
+];
+const reelsDir = process.env.DEMO_REELS_DIR;
+if (reelsDir) {
+  for (const [i, [username, caption, category]] of REELS.entries()) {
+    const video = path.join(reelsDir, `r${i + 1}.webm`);
+    const cover = path.join(reelsDir, `r${i + 1}.jpg`);
+    const u = users.find((x) => x.username === username);
+    if (!u || !fs.existsSync(video) || !fs.existsSync(cover)) continue;
+    const { data: has } = await u.client.from('posts').select('id').eq('author_id', u.id).eq('kind', 'video').limit(1);
+    if (has?.length) continue;
+    const vp = `${u.id}/${crypto.randomUUID()}.webm`;
+    const tp = `${u.id}/${crypto.randomUUID()}.jpg`;
+    for (const [p, file, type] of [[vp, video, 'video/webm'], [tp, cover, 'image/jpeg']]) {
+      const { error } = await u.client.storage.from('media').upload(p, fs.readFileSync(file), { contentType: type });
+      if (error) throw error;
+    }
+    const { error } = await u.client.from('posts').insert({ kind: 'video', media_path: vp, thumb_path: tp, caption, category, width: 720, height: 1280, duration_ms: 6000 });
+    if (error) throw error;
+    console.log('✓ reel', username);
+  }
 }
 
 // social graph: everyone follows a few others, likes and comments

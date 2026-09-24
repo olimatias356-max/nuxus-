@@ -7,3 +7,9 @@ node_modules/
 supabase/.branches
 supabase/.temp
 supabase/functions/.env
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+test-results/
+playwright-report/

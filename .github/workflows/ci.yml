@@ -32,6 +32,40 @@ jobs:
           EXPO_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
           EXPO_PUBLIC_SUPABASE_KEY: ci-placeholder-publishable-key
 
+  web:
+    name: Web (lint, typecheck, tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_KEY: ci-placeholder-publishable-key
+          NEXT_PUBLIC_SITE_URL: https://mbaretefans.com
+
+  functions:
+    name: Edge Functions (deno check, unit tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check supabase/functions/*/index.ts
+      - run: deno test supabase/functions/
+
   backend:
     name: Supabase (migrations, RLS tests, Edge Functions, e2e)
     runs-on: ubuntu-latest
@@ -46,7 +80,7 @@ jobs:
         run: supabase test db
       - name: Serve Edge Functions
         run: |
-          printf 'ALLOW_SANDBOX_PURCHASES=true\nPAYOUT_WEBHOOK_SECRET=ci-payout-secret\n' > supabase/functions/.env
+          printf 'PAYOUT_WEBHOOK_SECRET=ci-payout-secret\nDLOCAL_SECRET_KEY=ci-dlocal-secret\nDLOCAL_LOGIN=ci-dlocal-login\n' > supabase/functions/.env
           nohup supabase functions serve --env-file supabase/functions/.env > functions.log 2>&1 &
           sleep 20
       - uses: actions/setup-node@v4
