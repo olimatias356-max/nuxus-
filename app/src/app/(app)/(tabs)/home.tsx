@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, useWindowDimensions, View, type ViewToken } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,9 +9,12 @@ import { StoryRail } from '@/components/StoryRail';
 import { SuggestedCreators } from '@/components/SuggestedCreators';
 import { usePostActions } from '@/components/usePostActions';
 import { useBadges } from '@/lib/api/activity';
+import { useInterests } from '@/lib/api/config';
 import { useFeed, type FeedMode } from '@/lib/api/posts';
 import { useMe } from '@/lib/auth';
 import { errorMessage } from '@/lib/errors';
+import { onboardingKey } from '@/lib/onboarding';
+import { secureStorage } from '@/lib/secure-storage';
 import type { FeedItem } from '@/lib/types';
 import { colors, EmptyState, ErrorState, IconButton, Loading, Segmented, Skeleton, space, Wordmark } from '@/ui';
 
@@ -26,6 +29,19 @@ export default function Home() {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const items = useMemo(() => feed.data?.pages.flat() ?? [], [feed.data]);
+  const interests = useInterests();
+
+  // First visit: choose interests (once per account and device).
+  useEffect(() => {
+    if (!interests.data || interests.data.length > 0) return;
+    let alive = true;
+    secureStorage.getItem(onboardingKey(userId)).then((done) => {
+      if (alive && done !== '1') router.push('/onboarding');
+    });
+    return () => {
+      alive = false;
+    };
+  }, [interests.data, userId]);
 
   // must keep a stable identity: FlatList does not allow changing it on the fly
   const onViewable = useCallback(({ viewableItems }: { viewableItems: ViewToken<FeedItem>[] }) => {

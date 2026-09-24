@@ -207,3 +207,14 @@ export function trackView(postId: string, watchedMs = 0, completed = false) {
     () => tracked.delete(key),
   );
 }
+
+export function useExplore(category: string | null) {
+  return useQuery({
+    queryKey: ['posts', 'explore', category],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_explore', { p_category: category, p_limit: 45 });
+      if (error) throw error;
+      return (data ?? []) as FeedItem[];
+    },
+  });
+}

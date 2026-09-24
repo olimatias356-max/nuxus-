@@ -38,3 +38,20 @@ export async function deleteMyAccount(confirmation: string) {
     throw new Error(message);
   }
 }
+
+export function useInterests(enabled = true) {
+  return useQuery({
+    queryKey: ['interests'],
+    enabled,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('user_interests').select('category, weight, explicit').order('weight', { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as { category: string; weight: number; explicit: boolean }[];
+    },
+  });
+}
+
+export async function saveInterests(categories: string[]) {
+  const { error } = await supabase.rpc('set_interests', { p_categories: categories });
+  if (error) throw error;
+}

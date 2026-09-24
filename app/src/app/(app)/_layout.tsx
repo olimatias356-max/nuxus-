@@ -32,6 +32,7 @@ export default function AppLayout() {
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="create" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="onboarding" options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }} />
       <Stack.Screen name="comments/[id]" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       <Stack.Screen name="report" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       <Stack.Screen name="story/[authorId]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
